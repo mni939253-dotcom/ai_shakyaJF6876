@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATG 後台會員管理</title>
+  <style>
+    :root{--bg:#f3f7ff;--panel:#fff;--ink:#14243d;--muted:#718097;--line:#dce6f3;--primary:#3778ff;--primary2:#7657ff;--danger:#c63d4d;--good:#16845f;--shadow:0 20px 52px rgba(41,75,124,.13);--radius:24px}
+    *{box-sizing:border-box}html{min-height:100%}body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0,#fff 0,transparent 34%),linear-gradient(145deg,#f8faff,#eaf2ff)}
+    button,input,select{font:inherit}.hidden{display:none!important}.page{max-width:1240px;margin:auto;padding:24px}.card{background:rgba(255,255,255,.91);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .login{width:min(440px,calc(100% - 28px));margin:8vh auto;padding:30px}.brand{display:flex;align-items:center;gap:13px;margin-bottom:24px}.logo{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;color:#fff;font-weight:950;background:linear-gradient(135deg,var(--primary2),var(--primary));box-shadow:0 12px 24px rgba(55,120,255,.25)}h1,h2,p{margin-top:0}.login h1{margin-bottom:7px}.muted{color:var(--muted);line-height:1.65}.field{display:flex;flex-direction:column;gap:7px;margin:13px 0}.field label{font-weight:850;font-size:14px;color:#314a70}.field input,.field select{width:100%;height:46px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 13px;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:#8eb3ff;box-shadow:0 0 0 4px rgba(55,120,255,.09)}
+    .btn{height:44px;border:0;border-radius:14px;padding:0 17px;font-weight:900;cursor:pointer;transition:.17s}.btn:hover{transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,var(--primary2),var(--primary));color:#fff;box-shadow:0 12px 22px rgba(55,120,255,.2)}.btn.outline{background:#fff;border:1px solid var(--line);color:#2d4c79}.btn.danger{background:#fff0f2;color:var(--danger);border:1px solid #ffd1d8}.btn.good{background:#eafaf4;color:var(--good);border:1px solid #c5efdf}.full{width:100%}.notice{padding:12px 14px;border-radius:15px;background:#fff8e9;border:1px solid #ffe1a9;color:#76521a;font-size:13px;line-height:1.6;margin:14px 0}.error{background:#fff0f2;border-color:#ffd1d8;color:#a32e3c}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 22px;margin-bottom:18px}.topbar h1{margin:0;font-size:28px}.topbar p{margin:6px 0 0}.actions{display:flex;gap:9px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{padding:18px 20px}.stat small{color:var(--muted);font-weight:800}.stat strong{display:block;font-size:27px;margin-top:8px}.layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.panel{padding:22px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.panel-head h2{font-size:21px;margin:0}.search{display:flex;gap:9px}.search input{height:42px;border:1px solid var(--line);border-radius:13px;padding:0 12px;min-width:220px}.users{display:flex;flex-direction:column;gap:10px;max-height:650px;overflow:auto;padding-right:3px}.user{padding:14px;border:1px solid var(--line);border-radius:18px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:12px;cursor:pointer}.user:hover,.user.active{border-color:#91b7ff;background:#f7faff}.user b{display:block}.user small{display:block;color:var(--muted);margin-top:5px}.points{font-weight:950;color:#1d68db;font-size:18px;text-align:right}.badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#edf4ff;color:#3d68aa;font-size:12px;font-weight:900;margin-top:6px}.badge.off{background:#fff0f2;color:#ad3443}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}.divider{border:0;border-top:1px solid var(--line);margin:22px 0}.points-box{background:#f7faff;border:1px solid var(--line);border-radius:18px;padding:16px}.btnrow{display:flex;gap:9px;flex-wrap:wrap}.logs-card{margin-top:18px;padding:22px}.logs{display:flex;flex-direction:column;gap:9px}.log{display:grid;grid-template-columns:140px 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:#fff}.log time,.log small{color:var(--muted);font-size:13px}.plus{color:var(--good)}.minus{color:var(--danger)}.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}.toast{position:fixed;right:20px;bottom:20px;max-width:360px;padding:14px 16px;border-radius:15px;background:#17355f;color:#fff;box-shadow:var(--shadow);z-index:99}.toast.bad{background:#a73140}
+    @media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.topbar{align-items:flex-start}.form-grid{grid-template-columns:1fr}.log{grid-template-columns:1fr auto}.log time{grid-column:1/-1}.search input{min-width:0;width:100%}}@media(max-width:560px){.page{padding:13px}.stats{grid-template-columns:1fr}.topbar{flex-direction:column}.actions,.search{width:100%}.actions .btn{flex:1}.panel{padding:17px}.user{grid-template-columns:1fr}.points{text-align:left}}
+  </style>
+</head>
+<body>
+  <section id="loginView" class="login card">
+    <div class="brand"><div class="logo">ATG</div><div><h1>管理員後台</h1><p class="muted">會員帳號、名稱、密碼與點數管理</p></div></div>
+    <div id="configWarning" class="notice hidden">請先修改同資料夾的 <b>config.js</b>，填入 Supabase Project URL 與 publishable/anon key。</div>
+    <div class="field"><label>管理員帳號</label><input id="loginUsername" autocomplete="username" placeholder="例如 admin"></div>
+    <div class="field"><label>管理員密碼</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="輸入密碼"></div>
+    <button id="loginButton" class="btn primary full">登入後台</button>
+    <div id="loginError" class="notice error hidden"></div>
+  </section>
+
+  <main id="adminView" class="page hidden">
+    <header class="topbar card">
+      <div><h1>後台會員管理</h1><p class="muted">建立會員、修改名稱、重設密碼，以及補扣點數。</p></div>
+      <div class="actions"><button id="newButton" class="btn outline">新增會員</button><button id="logoutButton" class="btn danger">登出</button></div>
+    </header>
+
+    <section class="stats">
+      <div class="stat card"><small>會員總數</small><strong id="statTotal">0</strong></div>
+      <div class="stat card"><small>啟用會員</small><strong id="statActive">0</strong></div>
+      <div class="stat card"><small>會員總點數</small><strong id="statPoints">0</strong></div>
+      <div class="stat card"><small>目前管理員</small><strong id="statAdmin" style="font-size:20px">—</strong></div>
+    </section>
+
+    <div class="layout">
+      <section class="panel card">
+        <div class="panel-head"><h2>會員列表</h2><button id="reloadButton" class="btn outline">重新整理</button></div>
+        <div class="search"><input id="searchInput" placeholder="搜尋帳號或會員名稱"><button id="searchButton" class="btn primary">搜尋</button></div>
+        <div id="userList" class="users" style="margin-top:14px"></div>
+      </section>
+
+      <section class="panel card">
+        <div class="panel-head"><h2 id="formTitle">新增會員</h2><span id="formMode" class="badge">Create</span></div>
+        <input id="memberId" type="hidden">
+        <div class="form-grid">
+          <div class="field"><label>登入帳號</label><input id="username" placeholder="英文小寫，例如 user001"></div>
+          <div class="field"><label>會員名稱</label><input id="displayName" placeholder="例如 小明"></div>
+          <div class="field"><label>密碼／新密碼</label><input id="password" type="password" placeholder="新增會員至少 8 碼"></div>
+          <div class="field"><label>會員狀態</label><select id="status"><option value="active">啟用</option><option value="disabled">停用</option></select></div>
+          <div class="field"><label>會員等級</label><input id="vipLevel" value="VIP 1"></div>
+          <div class="field"><label>綁定平台</label><input id="platform" value="玖富/好贏"></div>
+          <div id="initialPointsField" class="field"><label>初始點數</label><input id="initialPoints" type="number" min="0" value="0"></div>
+        </div>
+        <div class="btnrow"><button id="saveButton" class="btn primary">儲存會員</button><button id="resetPasswordButton" class="btn outline hidden">只重設密碼</button></div>
+
+        <div id="pointSection" class="hidden">
+          <hr class="divider">
+          <div class="panel-head"><h2>點數管理</h2><strong id="currentPoints" class="points">0 點</strong></div>
+          <div class="points-box">
+            <div class="form-grid">
+              <div class="field"><label>直接設定點數</label><input id="setPoints" type="number" min="0" placeholder="例如 12580"></div>
+              <div class="field"><label>補點／扣點</label><input id="adjustPoints" type="number" placeholder="補 1000；扣 200 輸入 -200"></div>
+            </div>
+            <div class="field"><label>點數備註</label><input id="pointNote" placeholder="例如：代理補點、活動贈點"></div>
+            <div class="btnrow"><button id="setPointsButton" class="btn primary">設定為指定點數</button><button id="adjustPointsButton" class="btn good">增加／扣除點數</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="logs-card card">
+      <div class="panel-head"><h2 id="logsTitle">點數紀錄</h2><span class="badge">Logs</span></div>
+      <div id="logs" class="empty">請先從會員列表選擇一位會員。</div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="./config.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    const cfg = window.ATG_CONFIG || {}
+    const invalidConfig = !cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes('你的專案') || !cfg.SUPABASE_PUBLISHABLE_KEY || cfg.SUPABASE_PUBLISHABLE_KEY.includes('貼上')
+    document.getElementById('configWarning').classList.toggle('hidden', !invalidConfig)
+
+    const supabase = invalidConfig ? null : createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY)
+    const $ = (id) => document.getElementById(id)
+    let users = []
+    let selectedUser = null
+
+    const formatPoints = (n) => Number(n || 0).toLocaleString('zh-TW')
+    const internalEmail = (username) => `${String(username || '').trim().toLowerCase()}@${cfg.LOGIN_EMAIL_DOMAIN}`
+
+    function toast(message, bad = false) {
+      $('toast').textContent = message
+      $('toast').classList.toggle('bad', bad)
+      $('toast').classList.remove('hidden')
+      clearTimeout(window.__toastTimer)
+      window.__toastTimer = setTimeout(() => $('toast').classList.add('hidden'), 3200)
+    }
+
+    async function invoke(action, body = {}) {
+      if (!supabase) throw new Error('請先設定 config.js')
+      const { data, error } = await supabase.functions.invoke('admin-members', { body: { action, ...body } })
+      if (error) {
+        let message = error.message || '後台連線失敗'
+        try {
+          const detail = await error.context?.json()
+          if (detail?.message) message = detail.message
+        } catch (_) {}
+        throw new Error(message)
+      }
+      if (!data?.ok) throw new Error(data?.message || '操作失敗')
+      return data
+    }
+
+    async function login() {
+      $('loginError').classList.add('hidden')
+      try {
+        if (!supabase) throw new Error('請先修改 config.js')
+        $('loginButton').disabled = true
+        const username = $('loginUsername').value.trim()
+        const password = $('loginPassword').value
+        const { error } = await supabase.auth.signInWithPassword({ email: internalEmail(username), password })
+        if (error) throw new Error('管理員帳號或密碼錯誤')
+        const data = await invoke('me')
+        showAdmin(data.admin)
+      } catch (error) {
+        await supabase?.auth.signOut()
+        $('loginError').textContent = error.message
+        $('loginError').classList.remove('hidden')
+      } finally {
+        $('loginButton').disabled = false
+      }
+    }
+
+    async function showAdmin(admin) {
+      $('loginView').classList.add('hidden')
+      $('adminView').classList.remove('hidden')
+      $('statAdmin').textContent = admin.display_name || admin.username
+      await loadUsers()
+    }
+
+    async function logout() {
+      await supabase?.auth.signOut()
+      location.reload()
+    }
+
+    async function loadUsers() {
+      try {
+        $('userList').innerHTML = '<div class="empty">載入中…</div>'
+        const data = await invoke('list', { keyword: $('searchInput').value.trim() })
+        users = data.users || []
+        renderUsers()
+        renderStats()
+      } catch (error) {
+        $('userList').innerHTML = `<div class="empty">${error.message}</div>`
+        toast(error.message, true)
+      }
+    }
+
+    function renderStats() {
+      $('statTotal').textContent = users.filter(u => u.role === 'user').length
+      $('statActive').textContent = users.filter(u => u.role === 'user' && u.status === 'active').length
+      $('statPoints').textContent = formatPoints(users.filter(u => u.role === 'user').reduce((sum, u) => sum + Number(u.points || 0), 0))
+    }
+
+    function renderUsers() {
+      if (!users.length) {
+        $('userList').innerHTML = '<div class="empty">目前沒有會員。</div>'
+        return
+      }
+      $('userList').innerHTML = users.map(u => `
+        <article class="user ${selectedUser?.id === u.id ? 'active' : ''}" data-id="${u.id}">
+          <div><b>${escapeHtml(u.display_name)}｜${escapeHtml(u.username)}</b><small>${escapeHtml(u.vip_level)}・${escapeHtml(u.platform)}</small><span class="badge ${u.status === 'disabled' ? 'off' : ''}">${u.role === 'admin' ? '管理員' : (u.status === 'active' ? '啟用' : '停用')}</span></div>
+          <div class="points">${formatPoints(u.points)}<small> 點</small></div>
+        </article>`).join('')
+      document.querySelectorAll('.user').forEach(el => el.addEventListener('click', () => selectUser(el.dataset.id)))
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))
+    }
+
+    function resetForm() {
+      selectedUser = null
+      $('memberId').value = ''
+      $('formTitle').textContent = '新增會員'
+      $('formMode').textContent = 'Create'
+      $('username').value = ''
+      $('displayName').value = ''
+      $('password').value = ''
+      $('status').value = 'active'
+      $('vipLevel').value = 'VIP 1'
+      $('platform').value = '玖富/好贏'
+      $('initialPoints').value = '0'
+      $('initialPointsField').classList.remove('hidden')
+      $('resetPasswordButton').classList.add('hidden')
+      $('pointSection').classList.add('hidden')
+      $('logsTitle').textContent = '點數紀錄'
+      $('logs').className = 'empty'
+      $('logs').textContent = '請先從會員列表選擇一位會員。'
+      renderUsers()
+    }
+
+    async function selectUser(id) {
+      selectedUser = users.find(u => u.id === id)
+      if (!selectedUser) return
+      $('memberId').value = selectedUser.id
+      $('formTitle').textContent = selectedUser.role === 'admin' ? '修改管理員' : '修改會員'
+      $('formMode').textContent = 'Edit'
+      $('username').value = selectedUser.username
+      $('displayName').value = selectedUser.display_name
+      $('password').value = ''
+      $('status').value = selectedUser.status
+      $('vipLevel').value = selectedUser.vip_level
+      $('platform').value = selectedUser.platform
+      $('initialPointsField').classList.add('hidden')
+      $('resetPasswordButton').classList.remove('hidden')
+      $('pointSection').classList.remove('hidden')
+      $('currentPoints').textContent = `${formatPoints(selectedUser.points)} 點`
+      $('setPoints').value = selectedUser.points
+      $('adjustPoints').value = ''
+      $('pointNote').value = ''
+      $('logsTitle').textContent = `${selectedUser.display_name}｜點數紀錄`
+      renderUsers()
+      await loadLogs(selectedUser.id)
+    }
+
+    async function saveUser() {
+      try {
+        const id = $('memberId').value
+        const payload = {
+          username: $('username').value.trim(),
+          display_name: $('displayName').value.trim(),
+          vip_level: $('vipLevel').value.trim(),
+          platform: $('platform').value.trim(),
+          status: $('status').value,
+        }
+        if (id) {
+          await invoke('update', { id, ...payload })
+        } else {
+          await invoke('create', {
+            ...payload,
+            password: $('password').value,
+            points: Number($('initialPoints').value || 0),
+          })
+        }
+        toast(id ? '會員資料已更新' : '會員已建立')
+        await loadUsers()
+        resetForm()
+      } catch (error) { toast(error.message, true) }
+    }
+
+    async function resetPassword() {
+      if (!selectedUser) return toast('請先選擇會員', true)
+      const password = $('password').value
+      if (!password) return toast('請先輸入新密碼', true)
+      try {
+        await invoke('reset-password', { id: selectedUser.id, password })
+        $('password').value = ''
+        toast('密碼已重設')
+      } catch (error) { toast(error.message, true) }
+    }
+
+    async function setPoints() {
+      if (!selectedUser) return toast('請先選擇會員', true)
+      try {
+        await invoke('set-points', {
+          id: selectedUser.id,
+          points: Number($('setPoints').value),
+          note: $('pointNote').value.trim(),
+        })
+        toast('點數已設定')
+        await refreshSelected()
+      } catch (error) { toast(error.message, true) }
+    }
+
+    async function adjustPoints() {
+      if (!selectedUser) return toast('請先選擇會員', true)
+      try {
+        await invoke('adjust-points', {
+          id: selectedUser.id,
+          delta: Number($('adjustPoints').value),
+          note: $('pointNote').value.trim(),
+        })
+        toast('點數已調整')
+        await refreshSelected()
+      } catch (error) { toast(error.message, true) }
+    }
+
+    async function refreshSelected() {
+      const id = selectedUser.id
+      await loadUsers()
+      await selectUser(id)
+    }
+
+    async function loadLogs(id) {
+      try {
+        $('logs').className = 'logs'
+        $('logs').innerHTML = '<div class="empty">載入中…</div>'
+        const data = await invoke('logs', { id })
+        const rows = data.logs || []
+        if (!rows.length) {
+          $('logs').className = 'empty'
+          $('logs').textContent = '目前沒有點數紀錄。'
+          return
+        }
+        $('logs').innerHTML = rows.map(log => `
+          <div class="log">
+            <time>${new Date(log.created_at).toLocaleString('zh-TW')}</time>
+            <div><b>${escapeHtml(log.action)}</b><small>${escapeHtml(log.note || '')}・餘額 ${formatPoints(log.balance_after)}</small></div>
+            <strong class="${Number(log.amount) >= 0 ? 'plus' : 'minus'}">${Number(log.amount) > 0 ? '+' : ''}${formatPoints(log.amount)}</strong>
+          </div>`).join('')
+      } catch (error) {
+        $('logs').className = 'empty'
+        $('logs').textContent = error.message
+      }
+    }
+
+    $('loginButton').addEventListener('click', login)
+    $('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login() })
+    $('logoutButton').addEventListener('click', logout)
+    $('newButton').addEventListener('click', resetForm)
+    $('reloadButton').addEventListener('click', loadUsers)
+    $('searchButton').addEventListener('click', loadUsers)
+    $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') loadUsers() })
+    $('saveButton').addEventListener('click', saveUser)
+    $('resetPasswordButton').addEventListener('click', resetPassword)
+    $('setPointsButton').addEventListener('click', setPoints)
+    $('adjustPointsButton').addEventListener('click', adjustPoints)
+
+    ;(async () => {
+      if (!supabase) return
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) return
+      try {
+        const result = await invoke('me')
+        await showAdmin(result.admin)
+      } catch (_) {
+        await supabase.auth.signOut()
+      }
+    })()
+  </script>
+</body>
+</html>
+直
