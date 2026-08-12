@@ -3588,7 +3588,7 @@ window.ATG_CONFIG = {
                   <section class="rsg-panel rsg-strategy-panel">
                     <div class="rsg-panel-header">
                       <h3>推薦打法</h3>
-                      <span class="pill">Strategy</span>
+                      <span class="pill">${gameName === '雷神 II' ? '可啟用額外押注' : 'Strategy'}</span>
                     </div>
                     <div class="rsg-panel-body">
                       <div class="rsg-strategy-steps">
@@ -3597,7 +3597,7 @@ window.ATG_CONFIG = {
                             <b>步驟 1</b>
                             <span class="rsg-step-tag">Step 1</span>
                           </div>
-                          <p>以推薦最低注額平轉，遇到免遊或是 <span class="rsg-step-inline-mark">${strategyPlan.step1.symbol.name} ×5</span>，提高 <span class="rsg-step-inline-mark">${strategyPlan.step1.raise} 注</span>。</p>
+                          <p>以1塊注額平轉，遇到免遊或是 <span class="rsg-step-inline-mark">${strategyPlan.step1.symbol.name} ×5</span>，提高 <span class="rsg-step-inline-mark">${strategyPlan.step1.raise} 注</span>。</p>
                           <div class="rsg-step-visual">
                             <div class="rsg-step-visual-row">
                               <div class="rsg-step-symbol-pill">
