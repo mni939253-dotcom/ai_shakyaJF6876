@@ -2451,7 +2451,7 @@ button,.game-card,.room-card,.login-promo-card{-webkit-tap-highlight-color:trans
 }
 
 
-/* ===== 雷神 II 專用：買左邊 / 神運一擊買法 ===== */
+/* ===== 雷神 II 專用：買左邊或中間 / 神運一擊買法 ===== */
 .rsg-signal-side-note{
   display:inline-flex;
   align-items:center;
@@ -3375,43 +3375,120 @@ window.ATG_CONFIG = {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  const RSG_STEP23_STRATEGIES = [
+    { type: "symbol-multiplier", symbolName: "盾牌" },
+    { type: "symbol-multiplier", symbolName: "槌子" },
+    { type: "symbol-only", symbolName: "頭盔" },
+    { type: "symbol-multiplier", symbolName: "金幣" },
+    { type: "multiplier-chain" }
+  ];
+
+  function getRsgSymbolByName(symbols, name) {
+    return symbols.find(symbol => symbol.name === name) || null;
+  }
+
+  function getRsgStep23Plan(symbols) {
+    const picked = RSG_STEP23_STRATEGIES[Math.floor(Math.random() * RSG_STEP23_STRATEGIES.length)];
+    return {
+      ...picked,
+      symbol: picked.symbolName ? getRsgSymbolByName(symbols, picked.symbolName) : null,
+      raise: getRsgRandomInt(1, 2)
+    };
+  }
+
   function getRsgStrategyPlan(symbols) {
     const step1Symbol = rsgShuffle(symbols).slice(0, 1)[0];
-    const step2Symbol = rsgShuffle(symbols).slice(0, 1)[0];
-    const step3Symbols = rsgShuffle(symbols).slice(0, 2);
-    const step4Symbols = rsgShuffle(symbols).slice(0, 2);
 
-    const plan = {
+    return {
+      // 步驟 1 保留原本邏輯，不套用新增打法
       step1: {
         symbol: step1Symbol,
-        raise: getRsgRandomInt(1, 3)
+        raise: 3
       },
-      step2: {
-        symbol: step2Symbol,
-        raise: getRsgRandomInt(1, 3)
-      },
-      step3: {
-        symbols: step3Symbols,
-        amount: getRsgRandomInt(4, 6),
-        raise: getRsgRandomInt(2, 3)
-      },
+      // 新增的 5 種打法只會出現在步驟 2、3
+      step2: getRsgStep23Plan(symbols),
+      step3: getRsgStep23Plan(symbols),
+      // 步驟 4 只保留使用者指定的 2 種打法
       step4: {
-        symbols: step4Symbols,
-        amount: getRsgRandomInt(4, 6),
-        multi: getRsgRandomInt(1, 3)
+        variant: getRsgRandomInt(1, 2)
       }
     };
+  }
 
-    plan.step3.counts = [
-      getRsgRandomInt(4, 6),
-      getRsgRandomInt(4, 6)
-    ];
-    plan.step4.counts = [
-      getRsgRandomInt(4, 6),
-      getRsgRandomInt(4, 6)
-    ];
+  function getRsgStep23Text(step) {
+    const raiseHtml = `<span class="rsg-step-inline-mark">${step.raise} 注</span>`;
 
-    return plan;
+    if (step.type === "symbol-multiplier") {
+      return `遇到免遊或是消除 <span class="rsg-step-inline-mark">${step.symbolName}</span> 並接到倍數，提高 ${raiseHtml}。`;
+    }
+
+    if (step.type === "symbol-only") {
+      return `遇到免遊或是消除 <span class="rsg-step-inline-mark">${step.symbolName}</span>，提高 ${raiseHtml}。`;
+    }
+
+    return `遇到免遊或是接到倍數並且連消 <span class="rsg-step-inline-mark">4 次</span>，提高 ${raiseHtml}。`;
+  }
+
+  function getRsgStep23Visual(step) {
+    const raiseTag = `<span class="rsg-step-mini-tag">提高 <span class="rsg-step-highlight" style="margin:0 4px">${step.raise}</span> 注</span>`;
+
+    if (step.symbol) {
+      return `
+        <div class="rsg-step-visual">
+          <div class="rsg-step-visual-row">
+            <div class="rsg-step-symbol-pill">
+              <img src="${step.symbol.src}" alt="${step.symbol.name}">
+              <div>
+                <b>${step.symbol.name}</b>
+                <span>${step.type === "symbol-multiplier" ? "消除後接倍數" : "消除"}</span>
+              </div>
+            </div>
+            ${raiseTag}
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="rsg-step-visual">
+        <div class="rsg-step-visual-row">
+          <span class="rsg-step-mini-tag">倍數 + 連消 4 次</span>
+          ${raiseTag}
+        </div>
+      </div>
+    `;
+  }
+
+  function getRsgStep4Text(step) {
+    if (step.variant === 1) {
+      return `遇到免遊開出 <span class="rsg-step-inline-mark">BIG WIN 以上</span>，或是遇到 <span class="rsg-step-inline-mark">雙消大圖接到倍數</span>，以當下注額追買免遊。`;
+    }
+
+    return `遇到平轉或免遊開出 <span class="rsg-step-inline-mark">BIG WIN 以上</span>，或是遇到 <span class="rsg-step-inline-mark">回分高於下注額 12 倍</span>，以當下注額追買一般免遊或是降注買超級免遊。`;
+  }
+
+  function getRsgStep4Visual(step) {
+    if (step.variant === 1) {
+      return `
+        <div class="rsg-step-visual">
+          <div class="rsg-step-visual-row">
+            <span class="rsg-step-mini-tag">BIG WIN 以上</span>
+            <span class="rsg-step-mini-tag">雙消大圖 + 倍數</span>
+            <span class="rsg-step-mini-tag">當下注額追買免遊</span>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="rsg-step-visual">
+        <div class="rsg-step-visual-row">
+          <span class="rsg-step-mini-tag">BIG WIN 以上</span>
+          <span class="rsg-step-mini-tag">回分 > 下注額 12 倍</span>
+          <span class="rsg-step-mini-tag">追買一般免遊 / 降注買超級免遊</span>
+        </div>
+      </div>
+    `;
   }
 
   function renderRsgAnalysisPage(gameName, image) {
@@ -3474,7 +3551,7 @@ window.ATG_CONFIG = {
                   <section class="rsg-panel">
                     <div class="rsg-panel-header">
                       <h3>分析訊號</h3>
-                      ${gameName === '雷神 II' ? '<span class="rsg-signal-side-note">買左邊</span>' : '<span class="pill">3 Signals</span>'}
+                      ${gameName === '雷神 II' ? '<span class="rsg-signal-side-note">買左邊或中間</span>' : '<span class="pill">3 Signals</span>'}
                     </div>
                     <div class="rsg-panel-body">
                       <div class="rsg-signal-grid">
@@ -3540,19 +3617,8 @@ window.ATG_CONFIG = {
                             <b>步驟 2</b>
                             <span class="rsg-step-tag">Step 2</span>
                           </div>
-                          <p>遇到免遊或是 <span class="rsg-step-inline-mark">${strategyPlan.step2.symbol.name} ×6 + 2顆倍數</span>，提高 <span class="rsg-step-inline-mark">${strategyPlan.step2.raise} 注</span>。</p>
-                          <div class="rsg-step-visual">
-                            <div class="rsg-step-visual-row">
-                              <div class="rsg-step-symbol-pill">
-                                <img src="${strategyPlan.step2.symbol.src}" alt="${strategyPlan.step2.symbol.name}">
-                                <div>
-                                  <b>${strategyPlan.step2.symbol.name}</b>
-                                  <span>${strategyPlan.step2.symbol.name} ×6</span>
-                                </div>
-                              </div>
-                              <span class="rsg-step-mini-tag">提高 <span class="rsg-step-highlight" style="margin:0 4px">${strategyPlan.step2.raise}</span> 注</span>
-                            </div>
-                          </div>
+                          <p>${getRsgStep23Text(strategyPlan.step2)}</p>
+                          ${getRsgStep23Visual(strategyPlan.step2)}
                         </div>
 
                         <div class="rsg-step-card">
@@ -3560,21 +3626,8 @@ window.ATG_CONFIG = {
                             <b>步驟 3</b>
                             <span class="rsg-step-tag">Step 3</span>
                           </div>
-                          <p>遇到免遊或是 <span class="rsg-step-inline-mark">${strategyPlan.step3.symbols[0].name} ×${strategyPlan.step3.counts[0]} + ${strategyPlan.step3.symbols[1].name} ×${strategyPlan.step3.counts[1]}</span>，提高 <span class="rsg-step-inline-mark">${strategyPlan.step3.raise} 注</span>。</p>
-                          <div class="rsg-step-visual">
-                            <div class="rsg-step-visual-row">
-                              ${strategyPlan.step3.symbols.map((symbol, idx) => `
-                                <div class="rsg-step-symbol-pill">
-                                  <img src="${symbol.src}" alt="${symbol.name}">
-                                  <div>
-                                    <b>${symbol.name}</b>
-                                    <span>${symbol.name} ×${strategyPlan.step3.counts[idx]}</span>
-                                  </div>
-                                </div>
-                              `).join('')}
-                              <span class="rsg-step-mini-tag">提高 <span class="rsg-step-highlight" style="margin:0 4px">${strategyPlan.step3.raise}</span> 注</span>
-                            </div>
-                          </div>
+                          <p>${getRsgStep23Text(strategyPlan.step3)}</p>
+                          ${getRsgStep23Visual(strategyPlan.step3)}
                         </div>
 
                         <div class="rsg-step-card">
@@ -3582,21 +3635,10 @@ window.ATG_CONFIG = {
                             <b>步驟 4</b>
                             <span class="rsg-step-tag">Step 4</span>
                           </div>
-                          <p>遇到免遊開出 <span class="rsg-step-inline-mark">BIG WIN 以上</span>，或是遇到 <span class="rsg-step-inline-mark">${strategyPlan.step4.symbols[0].name} ×${strategyPlan.step4.counts[0]} + ${strategyPlan.step4.symbols[1].name} ×${strategyPlan.step4.counts[1]} + ${strategyPlan.step4.multi} 倍數</span>，以當下注額追買免遊。</p>
-                          <div class="rsg-step-visual">
-                            <div class="rsg-step-visual-row">
-                              ${strategyPlan.step4.symbols.map((symbol, idx) => `
-                                <div class="rsg-step-symbol-pill">
-                                  <img src="${symbol.src}" alt="${symbol.name}">
-                                  <div>
-                                    <b>${symbol.name}</b>
-                                    <span>${symbol.name} ×${strategyPlan.step4.counts[idx]}</span>
-                                  </div>
-                                </div>
-                              `).join('')}
-                              <span class="rsg-step-mini-tag"><span class="rsg-step-highlight" style="margin-right:4px">${strategyPlan.step4.multi}</span> 倍數</span>
-                            </div>
-                          </div>
+                          <p>${getRsgStep4Text(strategyPlan.step4)}</p>
+                          ${getRsgStep4Visual(strategyPlan.step4)}
+                        </div>
+
                         </div>
 
                       </div>
